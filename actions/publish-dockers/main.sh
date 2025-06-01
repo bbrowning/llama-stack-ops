@@ -58,25 +58,34 @@ build_and_push_docker() {
   template=$1
 
   echo "Building and pushing docker for template $template"
-  if [ "$PYPI_SOURCE" = "testpypi" ]; then
-    export CONTAINER_OPTS="${CONTAINER_OPTS:-} -t bbrowning/distribution-$template:test-${VERSION} --push"
-    TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
-  else
-    PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
-  fi
-  # docker images
 
-  # echo "Pushing docker image"
-  # if [ "$PYPI_SOURCE" = "testpypi" ]; then
-    # docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}
-    # docker push bbrowning/distribution-$template:test-${VERSION}
-    # docker buildx imagetools create -t bbrowning/distribution-$template:test-${VERSION} -f "$TMPDIR/$template.tar"
-  # else
-  #   docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
-  #   docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
-  #   docker push bbrowning/distribution-$template:${VERSION}
-  #   docker push bbrowning/distribution-$template:latest
-  # fi
+  for platform in "amd64 arm64"; do
+    export BUILD_PLATFORM="linux/$platform"
+    if [ "$PYPI_SOURCE" = "testpypi" ]; then
+      TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
+    else
+      PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
+    fi
+    docker images
+
+    echo "Pushing docker image for ${platform} platform"
+    if [ "$PYPI_SOURCE" = "testpypi" ]; then
+      docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}-${platform}
+      docker push bbrowning/distribution-$template:test-${VERSION}-${platform}
+    else
+      docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
+      docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
+      docker push bbrowning/distribution-$template:${VERSION}
+      docker push bbrowning/distribution-$template:latest
+    fi
+  done
+
+  if [ "$PYPI_SOURCE" = "testpypi" ]; then
+    docker buildx imagetools create \
+      -t bbrowning/distribution-$template:test-${VERSION} \
+      bbrowning/distribution-$template:test-${VERSION}-amd64 \
+      bbrowning/distribution-$template:test-${VERSION}-arm64
+  fi
 }
 
 
