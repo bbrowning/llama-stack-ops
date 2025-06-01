@@ -5,6 +5,7 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 TEMPLATES=${TEMPLATES:-}
+BUILD_PLATFORM=${BUILD_PLATFORM:-}
 
 set -euo pipefail
 
@@ -59,13 +60,13 @@ build_and_push_docker() {
 
   echo "Pushing docker image"
   if [ "$PYPI_SOURCE" = "testpypi" ]; then
-    docker tag distribution-$template:test-${VERSION} llamastack/distribution-$template:test-${VERSION}
-    docker push llamastack/distribution-$template:test-${VERSION}
+    docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}
+    docker push bbrowning/distribution-$template:test-${VERSION}
   else
     docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
     docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
-    docker push llamastack/distribution-$template:${VERSION}
-    docker push llamastack/distribution-$template:latest
+    docker push bbrowning/distribution-$template:${VERSION}
+    docker push bbrowning/distribution-$template:latest
   fi
 }
 
