@@ -59,7 +59,7 @@ build_and_push_docker() {
 
   echo "Building and pushing docker for template $template"
 
-  for platform in "amd64 arm64"; do
+  for platform in "amd64" "arm64"; do
     export BUILD_PLATFORM="linux/$platform"
     if [ "$PYPI_SOURCE" = "testpypi" ]; then
       TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
