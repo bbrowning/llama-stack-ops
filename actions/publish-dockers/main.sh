@@ -58,7 +58,7 @@ build_and_push_docker() {
   template=$1
 
   echo "Building and pushing docker for template $template"
-  CONTAINER_OPTS="${CONTAINER_OPTS:-} --output type=oci,dest=$TMPDIR/$template.tar"
+  export CONTAINER_OPTS="${CONTAINER_OPTS:-} --output type=oci,dest=$TMPDIR/$template.tar"
   if [ "$PYPI_SOURCE" = "testpypi" ]; then
     TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
   else
