@@ -47,9 +47,12 @@ uv pip install --index-url https://test.pypi.org/simple/ \
 which llama
 llama stack list-apis
 
+docker buildx ls
+
 if [ -n "$BUILDER_NAME" ]; then
   echo "Using docker builder $BUILDER_NAME"
-  docker buildx use "$BUILDER_NAME"
+  docker buildx use --default "$BUILDER_NAME"
+  export BUILDX_BUILDER="$BUILDER_NAME"
 fi
 
 build_and_push_docker() {
