@@ -9,6 +9,10 @@ inputs:
     description: 'Optional comma-separated templates to publish'
     required: false
     type: string
+  build_platform:
+    description: 'Optional comma-separated platforms to build'
+    required: false
+    type: string
   dockerhub_username:
     description: 'DockerHub username'
     required: true
