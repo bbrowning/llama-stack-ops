@@ -1,5 +1,6 @@
 #!/bin/bash
 
+VERSION="0.2.9rc1"
 if [ -z "$VERSION" ]; then
   echo "You must set the VERSION environment variable" >&2
   exit 1
@@ -46,6 +47,10 @@ uv pip install --index-url https://test.pypi.org/simple/ \
 which llama
 llama stack list-apis
 
+if [ -n "$BUILDER_NAME" ]; then
+  echo "Using docker builder $BUILDER_NAME"
+  docker build use "$BUILDER_NAME"
+fi
 
 build_and_push_docker() {
   template=$1
