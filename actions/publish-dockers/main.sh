@@ -50,8 +50,12 @@ llama stack list-apis
 docker buildx ls
 
 if [ -n "$BUILDER_NAME" ]; then
+  # Use the multi-platform qemu builder
   echo "Using docker builder $BUILDER_NAME"
   export BUILDX_BUILDER="$BUILDER_NAME"
+
+  # Load the built image from the builder to our docker images
+  export CONTAINER_OPTS="${CONTAINER_OPTS:-} --load"
 fi
 
 build_and_push_docker() {
@@ -62,8 +66,6 @@ build_and_push_docker() {
   for platform in "amd64" "arm64"; do
       # Build for the specific architecture
       export BUILD_PLATFORM="linux/$platform"
-      # Load the built image from the builder to our docker images
-      export CONTAINER_OPTS="${CONTAINER_OPTS:-} --load"
     if [ "$PYPI_SOURCE" = "testpypi" ]; then
       TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
     else
@@ -75,11 +77,14 @@ build_and_push_docker() {
     if [ "$PYPI_SOURCE" = "testpypi" ]; then
       docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}-${platform}
       docker push bbrowning/distribution-$template:test-${VERSION}-${platform}
+      docker rmi bbrowning/distribution-$template:test-${VERSION}-${platform}
     else
-      docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
-      docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
-      docker push bbrowning/distribution-$template:${VERSION}
-      docker push bbrowning/distribution-$template:latest
+      docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}-${platform}
+      docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest-${platform}
+      docker push bbrowning/distribution-$template:${VERSION}-${platform}
+      docker push bbrowning/distribution-$template:latest-${platform}
+      docker rmi bbrowning/distribution-$template:${VERSION}-${platform}
+      docker rmi bbrowning/distribution-$template:latest-${platform}
     fi
   done
 
@@ -89,6 +94,15 @@ build_and_push_docker() {
       -t bbrowning/distribution-$template:test-${VERSION} \
       bbrowning/distribution-$template:test-${VERSION}-amd64 \
       bbrowning/distribution-$template:test-${VERSION}-arm64
+  else
+    docker buildx imagetools create \
+      -t bbrowning/distribution-$template:${VERSION} \
+      bbrowning/distribution-$template:${VERSION}-amd64 \
+      bbrowning/distribution-$template:${VERSION}-arm64
+    docker buildx imagetools create \
+      -t bbrowning/distribution-$template:latest \
+      bbrowning/distribution-$template:${VERSION}-amd64 \
+      bbrowning/distribution-$template:${VERSION}-arm64
   fi
 }
 
