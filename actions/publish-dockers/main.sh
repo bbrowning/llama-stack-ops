@@ -49,7 +49,7 @@ llama stack list-apis
 
 if [ -n "$BUILDER_NAME" ]; then
   echo "Using docker builder $BUILDER_NAME"
-  docker build use "$BUILDER_NAME"
+  docker buildx use "$BUILDER_NAME"
 fi
 
 build_and_push_docker() {
