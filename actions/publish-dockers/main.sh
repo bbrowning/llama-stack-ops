@@ -108,6 +108,7 @@ build_and_push_docker() {
   fi
 
   docker image prune --force
+  docker buildx prune --force
 }
 
 
