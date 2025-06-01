@@ -51,14 +51,14 @@ docker buildx ls
 
 if [ -n "$BUILDER_NAME" ]; then
   echo "Using docker builder $BUILDER_NAME"
-  docker buildx use --default "$BUILDER_NAME"
-  export BUILDX_BUILDER="$BUILDER_NAME"
+  BUILDX_BUILDER="$BUILDER_NAME"
 fi
 
 build_and_push_docker() {
   template=$1
 
   echo "Building and pushing docker for template $template"
+  CONTAINER_OPTS="${CONTAINER_OPTS:-} --output type=oci,dest=$TMPDIR/$template.tar"
   if [ "$PYPI_SOURCE" = "testpypi" ]; then
     TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
   else
@@ -68,8 +68,9 @@ build_and_push_docker() {
 
   echo "Pushing docker image"
   if [ "$PYPI_SOURCE" = "testpypi" ]; then
-    docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}
-    docker push bbrowning/distribution-$template:test-${VERSION}
+    # docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}
+    # docker push bbrowning/distribution-$template:test-${VERSION}
+    docker buildx imagetools create -t bbrowning/distribution-$template:test-${VERSION} -f "$TMPDIR/$template.tar"
   else
     docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
     docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
