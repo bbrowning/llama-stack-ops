@@ -58,25 +58,25 @@ build_and_push_docker() {
   template=$1
 
   echo "Building and pushing docker for template $template"
-  export CONTAINER_OPTS="${CONTAINER_OPTS:-} --output type=oci,dest=$TMPDIR/$template.tar"
   if [ "$PYPI_SOURCE" = "testpypi" ]; then
+    export CONTAINER_OPTS="$CONTAINER_OPTS -t bbrowning/distribution-$template:test-${VERSION} --push"
     TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
   else
     PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
   fi
-  docker images
+  # docker images
 
-  echo "Pushing docker image"
-  if [ "$PYPI_SOURCE" = "testpypi" ]; then
+  # echo "Pushing docker image"
+  # if [ "$PYPI_SOURCE" = "testpypi" ]; then
     # docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}
     # docker push bbrowning/distribution-$template:test-${VERSION}
-    docker buildx imagetools create -t bbrowning/distribution-$template:test-${VERSION} -f "$TMPDIR/$template.tar"
-  else
-    docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
-    docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
-    docker push bbrowning/distribution-$template:${VERSION}
-    docker push bbrowning/distribution-$template:latest
-  fi
+    # docker buildx imagetools create -t bbrowning/distribution-$template:test-${VERSION} -f "$TMPDIR/$template.tar"
+  # else
+  #   docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
+  #   docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
+  #   docker push bbrowning/distribution-$template:${VERSION}
+  #   docker push bbrowning/distribution-$template:latest
+  # fi
 }
 
 
