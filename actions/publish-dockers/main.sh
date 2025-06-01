@@ -60,7 +60,10 @@ build_and_push_docker() {
   echo "Building and pushing docker for template $template"
 
   for platform in "amd64" "arm64"; do
-    export BUILD_PLATFORM="linux/$platform"
+      # Build for the specific architecture
+      export BUILD_PLATFORM="linux/$platform"
+      # Load the built image from the builder to our docker images
+      export CONTAINER_OPTS="${CONTAINER_OPTS:-} --load"
     if [ "$PYPI_SOURCE" = "testpypi" ]; then
       TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
     else
@@ -80,6 +83,7 @@ build_and_push_docker() {
     fi
   done
 
+  echo "Pushing multi-arch manifest list"
   if [ "$PYPI_SOURCE" = "testpypi" ]; then
     docker buildx imagetools create \
       -t bbrowning/distribution-$template:test-${VERSION} \
