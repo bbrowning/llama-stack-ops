@@ -11,6 +11,9 @@ on:
         description: 'Optional comma-separated templates to publish'
         required: false
         type: string
+  push:
+    branches:
+      - push-arm64-images
 
 jobs:
   publish-docker-images:
