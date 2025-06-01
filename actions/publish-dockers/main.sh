@@ -78,6 +78,7 @@ build_and_push_docker() {
       docker tag distribution-$template:test-${VERSION} bbrowning/distribution-$template:test-${VERSION}-${platform}
       docker push bbrowning/distribution-$template:test-${VERSION}-${platform}
       docker rmi bbrowning/distribution-$template:test-${VERSION}-${platform}
+      docker rmi bbrowning/distribution-$template:test-${VERSION}
     else
       docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}-${platform}
       docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest-${platform}
@@ -85,6 +86,7 @@ build_and_push_docker() {
       docker push bbrowning/distribution-$template:latest-${platform}
       docker rmi bbrowning/distribution-$template:${VERSION}-${platform}
       docker rmi bbrowning/distribution-$template:latest-${platform}
+      docker rmi bbrowning/distribution-$template:${VERSION}
     fi
   done
 
@@ -104,6 +106,8 @@ build_and_push_docker() {
       bbrowning/distribution-$template:${VERSION}-amd64 \
       bbrowning/distribution-$template:${VERSION}-arm64
   fi
+
+  docker image prune --force
 }
 
 
